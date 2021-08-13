@@ -95,19 +95,20 @@ app.post("/", async (req, res) => {
         let zmones = await readFile(DATA_FILE, {
             encoding:"utf-8"
         })
-        let id =0;
+        let id;
         zmones = JSON.parse(zmones);
-        for (let i=1; i <=zmones.length; i++) {
-            if (Number((Object.keys(req.body))) === i){
-                id = i;
-            }
-        }
         for (const zmogus of zmones) {
-            if (zmogus.id === id) {
-                zmones.splice(id-1,1)
+            if (Number((Object.keys(req.body))) === zmogus.id){
+                id = zmogus.id;
             }
         }
-
+        // console.log(Number((Object.keys(req.body))));
+        // console.log(id);
+        const zmogus = zmones.find(z => z.id === id)
+        // if (zmogus.id === id ) {
+        //     zmones.splice(1, zmogus)
+        // };
+        zmones.splice((zmones.indexOf(zmogus)),1);
         await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
                 encoding:"utf8"
             })

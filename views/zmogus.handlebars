@@ -1,0 +1,14 @@
+
+{{#if zmogus}}
+<h1>Informacija apie pasirinkta zmogu: </h1>
+{{#with zmogus}}
+vardas: <b>{{vardas}}</b><br>
+pavarde: <b>{{pavarde}}</b><br>
+alga: <b>{{alga}}</b>
+
+{{/with}}
+{{else}}
+<h1>You stupid!</h1>
+{{/if}}
+
+<button><a style="text-decoration: none;" href="/">Go back</a></button>

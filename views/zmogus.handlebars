@@ -2,13 +2,19 @@
 {{#if zmogus}}
 <h1>Informacija apie pasirinkta zmogu: </h1>
 {{#with zmogus}}
-vardas: <b>{{vardas}}</b><br>
-pavarde: <b>{{pavarde}}</b><br>
-alga: <b>{{alga}}</b>
+Vardas: <b>{{vardas}}</b><br>
+Pavarde: <b>{{pavarde}}</b><br>
+Alga: <b>{{alga}}<br></b>
+
+Unikalus identifikavimo numeris: <b>{{id}}</b>
 
 {{/with}}
+
 {{else}}
 <h1>You stupid!</h1>
 {{/if}}
 
-<button><a style="text-decoration: none;" href="/">Go back</a></button>
+<br><button><a style="text-decoration: none;" href="/">Go back</a></button>
+{{#with zmogus}}
+<a href="/redagavimas/{{id}}">Redaguoti duomenys</a>
+{{/with}}

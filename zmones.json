@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": 3,
+    "vardas": "ĘĘĘ",
+    "alga": "5757",
+    "pavarde": "ĘĘĘ"
+  },
+  {
+    "id": 4,
+    "vardas": "ASAP",
+    "pavarde": "Rocky",
+    "alga": 149
+  },
+  {
+    "id": 5,
+    "vardas": "RR",
+    "pavarde": "RRR",
+    "alga": "333"
+  }
+]

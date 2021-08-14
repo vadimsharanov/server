@@ -1,6 +1,5 @@
 import express, { response } from "express";
 import { readFile, writeFile } from "fs/promises";
-import Handlebars from "handlebars";
 import exphbs from "express-handlebars";
 
 const SERVER_PORT = 3000;
@@ -76,10 +75,8 @@ app.post("/zmogus", async (req, res) => {
         pavarde: req.body.pavarde,
         alga: parseFloat(req.body.alga),
     }
-
+    console.log(req.body.naujasVardas);
     zmones.push(zmogus);
-    console.log(req.body.zmogus2);
-    
     await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
         encoding:"utf8"
     })
@@ -102,24 +99,45 @@ app.post("/", async (req, res) => {
                 id = zmogus.id;
             }
         }
-        // console.log(Number((Object.keys(req.body))));
-        // console.log(id);
         const zmogus = zmones.find(z => z.id === id)
-        // if (zmogus.id === id ) {
-        //     zmones.splice(1, zmogus)
-        // };
         zmones.splice((zmones.indexOf(zmogus)),1);
         await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
-                encoding:"utf8"
-            })
-            
+            encoding:"utf8"
+        })
+        
         res.redirect("/")
-}
+    }
     catch (err) {
-    res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
-}
-
+        res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
+    }
+    
 })
+
+app.get("/redagavimas/:id", async (req, res) => {
+    try {
+        let zmones = await readFile(DATA_FILE, {
+            encoding:"utf-8"
+        })
+        zmones = JSON.parse(zmones);
+        const id = parseInt(req.params.id);
+        const zmogus = zmones.find(z => z.id === id);
+        res.render("redagavimas", { zmogus, title: "Zmogaus redagavimas"});
+        if (req.query.naujasVardas === undefined || req.query.naujasVardas === ""){
+        }
+        else {
+        zmones[zmones.indexOf(zmogus)].vardas = req.query.naujasVardas;
+        zmones[zmones.indexOf(zmogus)].pavarde = req.query.naujaPavarde;
+        zmones[zmones.indexOf(zmogus)].alga = req.query.naujaAlga;
+        }
+        await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
+            encoding:"utf8"
+        })
+    }
+    catch (err) {
+        res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
+    }
+});
+
 
 app.listen(SERVER_PORT)
 

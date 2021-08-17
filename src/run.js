@@ -28,7 +28,7 @@ app.use(express.urlencoded( {
 }))
 app.use(express.json());
 
-app.get("/", async function (req, res) {
+app.get("/", async function (req, res) {  // generuojame zmoniu sarasa
     try {
         let zmones = await readFile(DATA_FILE, {
         encoding:"utf-8"
@@ -43,7 +43,7 @@ app.get("/", async function (req, res) {
 }
 });
 
-app.get("/zmogus/:id?", async (req, res) => {
+app.get("/zmogus/:id?", async (req, res) => { // sukuriame atskira puslapy, kiekvienam zmogui
     try {
         let zmogus = null;
         if (req.params.id) {
@@ -64,7 +64,7 @@ app.get("/zmogus/:id?", async (req, res) => {
 }
 });
 
-app.post("/zmogus", async (req, res) => {
+app.post("/zmogus", async (req, res) => {  // naujo zmogaus kurimas
     try {
         let zmones = await readFile(DATA_FILE, {
         encoding:"utf-8"
@@ -140,7 +140,7 @@ catch (err) {
     
 // })
 
-app.get("/zmones/:id/delete", async (req, res) => {
+app.get("/zmones/:id/delete", async (req, res) => { // padarom linka, i kuri nuejus zmogus trinamas
     try {
         let zmones = await readFile(DATA_FILE, {
         encoding:"utf-8"
@@ -165,7 +165,7 @@ app.get("/zmones/:id/delete", async (req, res) => {
 }
 });
 
-app.get("/redagavimas/:id", async (req, res) => {
+app.get("/redagavimas/:id", async (req, res) => { // zmogaus redagavimas
     try {
         let zmones = await readFile(DATA_FILE, {
             encoding:"utf-8"
@@ -206,17 +206,45 @@ app.get("/json/zmogus", async(req, res) => {
             encoding:"utf-8"
         }));
     }
-    });
+});
 
-    app.post("/json/zmogus", async(req, res) => {
+app.delete("/json/zmogus/:id", async(req, res) => { 
+    try {
+        let zmones = await readFile(DATA_FILE, {
+        encoding:"utf-8"
+    })
+    zmones = JSON.parse(zmones); 
+    const id = parseInt(req.params.id);
+    const index = zmones.findIndex(z => z.id === id);
+    if (index >=0) {
+        zmones.splice(index, 1)
+        await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
+            encoding:"utf-8"
+        })
+    }
+    res.status(200).end();
+    }
+    catch (err) {
+    res.status(500).end(await readFile(KLAIDA, {
+        encoding:"utf-8"
+    }));
+    }
+    
+}); // zmogaus trinimas, naudojant DOM
+
+
+
+    app.post("/json/zmogus", async(req, res) => { // naujo zmogaus kurimas, naudojant DOM
         try {
             let zmones = await readFile(DATA_FILE, {
             encoding:"utf-8"
         })
         zmones = JSON.parse(zmones);
+
+        let zmogus;
         if (req.body.id) {
             const id = parseInt(req.body.id);
-            const zmogus = zmones.find(z => z.id === id);
+            zmogus = zmones.find(z => z.id === id);
              if (zmogus) {
                  zmogus.vardas = req.body.vardas
                  zmogus.pavarde = req.body.pavarde
@@ -233,20 +261,22 @@ app.get("/json/zmogus", async(req, res) => {
             for (const zmogus of zmones) {
                 if (zmogus.id > nextId) {
                     nextId = zmogus.id
-                    nextId++;
+                }
             }
-        }
-        const zmogus = {
+            nextId++;
+            zmogus = {
             id: nextId,
             vardas: req.body.vardas,
             pavarde: req.body.pavarde,
             alga: parseFloat(req.body.alga),
-        }
+        };
         zmones.push(zmogus);
-        }
+        };
         await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
             encoding:"utf8"
         })
+        res.set("Content-Type", "application/json") // siunciant respons'a atgal, nustatome tipa
+        res.send(JSON.stringify(zmogus))
         res.status(201).end()
     }
     catch (err) {

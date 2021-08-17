@@ -1,31 +1,21 @@
-
-
+let zmones = [];
 async function getPeople() {
     try {
      const res = await fetch("/json/zmogus");
      if (res.ok) {
-         const zmones = await res.json();
-         const app = document.getElementById("app");
-         cleanElement(app)
-         const ul = document.createElement("ul");
-        for (const zmogus of zmones) {
-            const li = document.createElement("li");
-            li.appendChild(document.createTextNode(`${zmogus.vardas} ${zmogus.pavarde} (${zmogus.alga})`));
-            ul.appendChild(li)
-            const deleteButton = document.createElement("button");
-            deleteButton.appendChild(document.createTextNode("delete"))
-            deleteButton.onclick = deletePeople
-            li.appendChild(deleteButton)
-        }
-        app.appendChild(ul)
+        zmones = await res.json();
+        showPeople();
      }
+     else {
+        console.log(res.status, res.statusText);
+        alert(`klaida gaunant duomenis is serverio:  ${res.statusText}` )
+    }
 }
 catch (err) {
     console.log(err);
 }
 }
-
-function addPeople() {
+function showOnePeople() {
     const app = document.getElementById("app")
     cleanElement(app);
     let input;
@@ -54,19 +44,41 @@ function addPeople() {
     app.appendChild(button)
     button = document.createElement("button");
     button.appendChild(document.createTextNode("Back"));
-    button.onclick = getPeople
-    app.appendChild(button)
+    button.onclick = showPeople;
+    app.appendChild(button);
 }
+
+
+async function showPeople() {
+            const app = document.getElementById("app");
+            cleanElement(app)
+            const table = document.createElement("table");
+           for (const zmogus of zmones) {
+               const tr = document.createElement("tr");
+               const td = document.createElement("td");
+               td.appendChild(document.createTextNode(`${zmogus.vardas} ${zmogus.pavarde} (${zmogus.alga})`));
+               tr.appendChild(td);
+               table.appendChild(tr)
+               const deleteButton = document.createElement("button");
+               deleteButton.appendChild(document.createTextNode("delete"));
+               deleteButton.zmogusId = zmogus.id
+               deleteButton.onclick = deletePeople
+               td.appendChild(deleteButton)
+           }
+           app.appendChild(table)
+        }
+
 
  async function savePeople() {
     let vardas = document.getElementById("vardas").value
     let pavarde = document.getElementById("pavarde").value
     let alga = (document.getElementById("alga")).value
-    const zmogus = {
+    let zmogus = {
         vardas,
         pavarde,
         alga,
     };
+    try {
     let res = await fetch("/json/zmogus", {
         method:"POST",
         headers: {
@@ -74,15 +86,44 @@ function addPeople() {
         },
         body: JSON.stringify(zmogus)
     });
-    if (!res.ok) {
-        console.log("Save failed with status :" + res.status);
+    if (res.ok) {
+        zmogus = await res.json();
+        zmones.push(zmogus);
+        showPeople()
+        // console.log("Save failed with status :" + res.status);
     }
-    getPeople()
+    else {
+        console.log(res.status, res.statusText);
+        alert(`Klaida issaugant: ${res.statusText}`)
+    }
+} 
+catch (err) {
+    console.log(err);
+} 
 }
 
-async function deletePeople() {
-    const newNode = document.createTextNode("This text was added dynamic");
-    document.body.appendChild(newNode)
+
+async function deletePeople(event) {
+    if (event && event.target && event.target.zmogusId) {
+       const index =  zmones.findIndex(z => z.id === event.target.zmogusId)
+       const zmogus = zmones[index]; // priskiriame kintamajam "zmogus" tikslu json masyvo elemento numeri
+        try {
+            const res = await fetch("/json/zmogus/" + zmogus.id, {
+            method: "DELETE"
+        });
+            if (res.ok) {
+                zmones.splice(index,1);
+               showPeople();
+            }
+            else {
+                console.log(res.status, res.statusText);
+                alert("klaida trinant: " + res.statusText )
+            }
+       }
+       catch (err) {
+           console.log(err);
+       }
+    }
 }
 
 

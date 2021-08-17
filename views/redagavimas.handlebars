@@ -5,14 +5,15 @@ Alga: <b>{{alga}}<br></b>
 
 Unikalus identifikavimo numeris: <b>{{id}}</b>
 
-{{/with}}
+
     <br><form method="get">
-        naujas vardas: <input type="text" name="naujasVardas" ><br>
+        naujas vardas: <input type="text" value="{{vardas}}" name="naujasVardas" ><br>
         <br>
-        nauja pavarde: <input type="text" name="naujaPavarde" ><br>
+        nauja pavarde: <input type="text" value="{{pavarde}}" name="naujaPavarde" ><br>
         <br>
-        nauja alga: <input type="number" name="naujaAlga" ><br>
+        nauja alga: <input type="number" value="{{alga}}" name="naujaAlga" ><br>
         <br>
         <input type="submit" value="Save" href="/">
        <button><a href="/">Go back!</a></button> 
         </form>
+        {{/with}}

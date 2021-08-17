@@ -5,6 +5,7 @@ import exphbs from "express-handlebars";
 const SERVER_PORT = 3000;
 const WEB_DIR = "web";
 const DATA_FILE = "zmones.json"
+const KLAIDA = "404-mergaite.html"
 
 const app = express()
 app.engine("handlebars", exphbs());
@@ -25,6 +26,7 @@ app.use(express.static(WEB_DIR, {
 app.use(express.urlencoded( {
     extended:true
 }))
+app.use(express.json());
 
 app.get("/", async function (req, res) {
     try {
@@ -35,23 +37,30 @@ app.get("/", async function (req, res) {
     res.render("zmones", { zmones , title: "Pilnas zmoniu sarasas"});
 }
     catch (err) {
-    res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
+        res.status(500).end(await readFile(KLAIDA, {
+        encoding:"utf-8"
+    }));
 }
 });
 
-app.get("/zmogus/:id", async (req, res) => {
+app.get("/zmogus/:id?", async (req, res) => {
     try {
+        let zmogus = null;
+        if (req.params.id) {
         let zmones = await readFile(DATA_FILE, {
         encoding:"utf-8"
     })
     zmones = JSON.parse(zmones);
 
     const id = parseInt(req.params.id);
-    const zmogus = zmones.find(z => z.id === id);
+    zmogus = zmones.find(z => z.id === id);
+}
     res.render("zmogus", { zmogus, title: "Zmogaus informacija"});
 }
     catch (err) {
-    res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
+    res.status(500).end(await readFile(KLAIDA, {
+        encoding:"utf-8"
+    }));
 }
 });
 
@@ -61,57 +70,100 @@ app.post("/zmogus", async (req, res) => {
         encoding:"utf-8"
     })
     zmones = JSON.parse(zmones);
-    let nextId = 0;
-    for (const zmogus of zmones) {
-        if (zmogus.id > nextId) {
-        nextId = zmogus.id
+    if (req.body.id) {
+        const id = parseInt(req.body.id);
+        const zmogus = zmones.find(z => z.id === id);
+         if (zmogus) {
+             zmogus.vardas = req.body.vardas
+             zmogus.pavarde = req.body.pavarde
+             zmogus.alga = parseFloat(req.body.alga);
+         }
+         else {
+             res.render("nera", {id})
+             return;
+         }
     }
-}
-    nextId++;
     
+    else {
+        let nextId = 0;
+        for (const zmogus of zmones) {
+            if (zmogus.id > nextId) {
+                nextId = zmogus.id
+                nextId++;
+        }
+    }
     const zmogus = {
         id: nextId,
         vardas: req.body.vardas,
         pavarde: req.body.pavarde,
         alga: parseFloat(req.body.alga),
     }
-    console.log(req.body.naujasVardas);
     zmones.push(zmogus);
+    }
     await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
         encoding:"utf8"
     })
     res.redirect("/")
 }
 catch (err) {
-    res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
+        res.status(500).end(await readFile(KLAIDA, {
+        encoding:"utf-8"
+    }));
 }
 
 })
-app.post("/", async (req, res) => {
+// app.post("/", async (req, res) => {
+//     try {
+//         let zmones = await readFile(DATA_FILE, {
+//             encoding:"utf-8"
+//         })
+//         let id;
+//         zmones = JSON.parse(zmones);
+//         for (const zmogus of zmones) {
+//             if (Number((Object.keys(req.body))) === zmogus.id){
+//                 id = zmogus.id;
+//             }
+//         }
+//         const zmogus = zmones.find(z => z.id === id)
+//         zmones.splice((zmones.indexOf(zmogus)),1);
+//         await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
+//             encoding:"utf8"
+//         })
+        
+//         res.redirect("/")
+//     }
+//     catch (err) {
+//             res.status(500).end(await readFile(KLAIDA, {
+//         encoding:"utf-8"
+//     }));
+//     }
+    
+// })
+
+app.get("/zmones/:id/delete", async (req, res) => {
     try {
         let zmones = await readFile(DATA_FILE, {
+        encoding:"utf-8"
+    })
+    zmones = JSON.parse(zmones);
+
+    const id = parseInt(req.params.id);
+    const index = zmones.findIndex(z => z.id === id);
+    if (index >=0) {
+        zmones.splice(index, 1)
+        await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
             encoding:"utf-8"
         })
-        let id;
-        zmones = JSON.parse(zmones);
-        for (const zmogus of zmones) {
-            if (Number((Object.keys(req.body))) === zmogus.id){
-                id = zmogus.id;
-            }
-        }
-        const zmogus = zmones.find(z => z.id === id)
-        zmones.splice((zmones.indexOf(zmogus)),1);
-        await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
-            encoding:"utf8"
-        })
-        
-        res.redirect("/")
     }
+    res.redirect("/")
+
+}
     catch (err) {
-        res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
-    }
-    
-})
+    res.status(500).end(await readFile(KLAIDA, {
+        encoding:"utf-8"
+    }));
+}
+});
 
 app.get("/redagavimas/:id", async (req, res) => {
     try {
@@ -127,17 +179,83 @@ app.get("/redagavimas/:id", async (req, res) => {
         else {
         zmones[zmones.indexOf(zmogus)].vardas = req.query.naujasVardas;
         zmones[zmones.indexOf(zmogus)].pavarde = req.query.naujaPavarde;
-        zmones[zmones.indexOf(zmogus)].alga = req.query.naujaAlga;
+        zmones[zmones.indexOf(zmogus)].alga = parseFloat(req.query.naujaAlga);
         }
         await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
             encoding:"utf8"
         })
     }
     catch (err) {
-        res.status(500).end(`<html><body><h1>Ivyko klaida ${err.message}<h1></body></html>`);
+            res.status(500).end(await readFile(KLAIDA, {
+        encoding:"utf-8"
+    }));
     }
 });
+app.get("/json/zmogus", async(req, res) => {
+        try {
+            let zmones = await readFile(DATA_FILE, {
+            encoding:"utf-8"
+        })
+        zmones = JSON.parse(zmones);
+        res.set("Content-Type", "application/json") // siunciant respons'a atgal, nustatome tipa
+        res.send(JSON.stringify(zmones))
+    
+    }
+        catch (err) {
+        res.status(500).end(await readFile(KLAIDA, {
+            encoding:"utf-8"
+        }));
+    }
+    });
 
+    app.post("/json/zmogus", async(req, res) => {
+        try {
+            let zmones = await readFile(DATA_FILE, {
+            encoding:"utf-8"
+        })
+        zmones = JSON.parse(zmones);
+        if (req.body.id) {
+            const id = parseInt(req.body.id);
+            const zmogus = zmones.find(z => z.id === id);
+             if (zmogus) {
+                 zmogus.vardas = req.body.vardas
+                 zmogus.pavarde = req.body.pavarde
+                 zmogus.alga = parseFloat(req.body.alga);
+             }
+             else {
+                 res.render("nera", {id})
+                 return;
+             }
+        }
+        
+        else {
+            let nextId = 0;
+            for (const zmogus of zmones) {
+                if (zmogus.id > nextId) {
+                    nextId = zmogus.id
+                    nextId++;
+            }
+        }
+        const zmogus = {
+            id: nextId,
+            vardas: req.body.vardas,
+            pavarde: req.body.pavarde,
+            alga: parseFloat(req.body.alga),
+        }
+        zmones.push(zmogus);
+        }
+        await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
+            encoding:"utf8"
+        })
+        res.status(201).end()
+    }
+    catch (err) {
+            res.status(500).end(await readFile(KLAIDA, {
+            encoding:"utf-8"
+        }));
+    }
+    
+    })
 
 app.listen(SERVER_PORT)
 

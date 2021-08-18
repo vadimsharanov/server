@@ -1,56 +1,32 @@
 [
   {
-    "id": 7,
-    "vardas": "4324",
-    "pavarde": "43242",
-    "alga": 432423
+    "id": 21,
+    "vardas": "Bevardis",
+    "pavarde": "Bepavardis",
+    "alga": 100
   },
   {
-    "id": 7,
-    "vardas": "dd",
-    "pavarde": "dd",
-    "alga": null
+    "id": 22,
+    "vardas": "Bevardis",
+    "pavarde": "Bepavardis",
+    "alga": 200
   },
   {
-    "id": 7,
-    "vardas": "",
-    "pavarde": "",
-    "alga": null
+    "id": 23,
+    "vardas": "Bevardis",
+    "pavarde": "Bepavardis",
+    "alga": 100
   },
   {
-    "id": 7,
-    "vardas": "ddd",
-    "pavarde": "ddd",
-    "alga": 33
+    "id": 24,
+    "vardas": "Bevardis",
+    "pavarde": "Bepavardis",
+    "alga": 0
   },
   {
-    "id": 8,
-    "vardas": "dadad",
-    "pavarde": "dsad",
-    "alga": 432423
-  },
-  {
-    "id": 9,
-    "vardas": "dfafad",
-    "pavarde": "rafdas",
-    "alga": 32423
-  },
-  {
-    "id": 10,
-    "vardas": "dsad",
-    "pavarde": "dsad",
-    "alga": 4432
-  },
-  {
-    "id": 11,
-    "vardas": "dsad",
-    "pavarde": "dsad",
-    "alga": null
-  },
-  {
-    "id": 12,
-    "vardas": "gfdg",
-    "pavarde": "gfdg",
-    "alga": 3213213
+    "id": 25,
+    "vardas": "Bevardis",
+    "pavarde": "Bepavardis",
+    "alga": 0
   }
 ]

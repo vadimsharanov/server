@@ -165,32 +165,32 @@ app.get("/zmones/:id/delete", async (req, res) => { // padarom linka, i kuri nue
 }
 });
 
-app.get("/redagavimas/:id", async (req, res) => { // zmogaus redagavimas
-    try {
-        let zmones = await readFile(DATA_FILE, {
-            encoding:"utf-8"
-        })
-        zmones = JSON.parse(zmones);
-        const id = parseInt(req.params.id);
-        const zmogus = zmones.find(z => z.id === id);
-        res.render("redagavimas", { zmogus, title: "Zmogaus redagavimas"});
-        if (req.query.naujasVardas === undefined || req.query.naujasVardas === ""){
-        }
-        else {
-        zmones[zmones.indexOf(zmogus)].vardas = req.query.naujasVardas;
-        zmones[zmones.indexOf(zmogus)].pavarde = req.query.naujaPavarde;
-        zmones[zmones.indexOf(zmogus)].alga = parseFloat(req.query.naujaAlga);
-        }
-        await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
-            encoding:"utf8"
-        })
-    }
-    catch (err) {
-            res.status(500).end(await readFile(KLAIDA, {
-        encoding:"utf-8"
-    }));
-    }
-});
+// app.get("/redagavimas/:id", async (req, res) => { // zmogaus redagavimas
+//     try {
+//         let zmones = await readFile(DATA_FILE, {
+//             encoding:"utf-8"
+//         })
+//         zmones = JSON.parse(zmones);
+//         const id = parseInt(req.params.id);
+//         const zmogus = zmones.find(z => z.id === id);
+//         res.render("redagavimas", { zmogus, title: "Zmogaus redagavimas"});
+//         if (req.query.naujasVardas === undefined || req.query.naujasVardas === ""){
+//         }
+//         else {
+//         zmones[zmones.indexOf(zmogus)].vardas = req.query.naujasVardas;
+//         zmones[zmones.indexOf(zmogus)].pavarde = req.query.naujaPavarde;
+//         zmones[zmones.indexOf(zmogus)].alga = parseFloat(req.query.naujaAlga);
+//         }
+//         await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
+//             encoding:"utf8"
+//         })
+//     }
+//     catch (err) {
+//             res.status(500).end(await readFile(KLAIDA, {
+//         encoding:"utf-8"
+//     }));
+//     }
+// });
 app.get("/json/zmogus", async(req, res) => {
         try {
             let zmones = await readFile(DATA_FILE, {
@@ -286,7 +286,34 @@ app.delete("/json/zmogus/:id", async(req, res) => {
     }
     
     })
-
+    app.put("/json/zmogus/:id", async(req, res) => { 
+        try {
+            let zmones = await readFile(DATA_FILE, {
+            encoding:"utf-8"
+        })
+        zmones = JSON.parse(zmones); 
+        const id = parseInt(req.params.id);
+        const zmogus = zmones.find(z => z.id === id);
+        if (zmogus) {
+            zmogus.vardas = req.body.vardas;
+            zmogus.pavarde = req.body.pavarde;
+            zmogus.alga = parseFloat(req.body.alga)
+            await writeFile(DATA_FILE, JSON.stringify(zmones, null, 2), {
+                encoding:"utf-8"
+            })
+            res.status(200).end(JSON.stringify(zmogus));
+        }
+        else {
+            res.status(404).end()
+        }
+        }
+        catch (err) {
+        res.status(500).end(await readFile(KLAIDA, {
+            encoding:"utf-8"
+        }));
+        }
+        
+    });
 app.listen(SERVER_PORT)
 
 console.log(`Server started at port: ${SERVER_PORT}`);
